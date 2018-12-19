@@ -1,8 +1,10 @@
 import express from 'express'
 import bcrypt from 'bcrypt'
+import mongoose from 'mongoose'
 import { validationResult  } from 'express-validator/check'
 
 import User from '../models/User'
+import Vote from '../models/Vote'
 import forms from '../forms/user'
 
 const router = express.Router()
@@ -45,6 +47,40 @@ router.post('', forms.register, (req, res) => {
                 })
             }
         })
+    })
+})
+
+router.get('/:userId', (req, res) => {
+    const userId = req.params.userId
+
+    console.log(req.decoded)
+
+    if (req.decoded._id !== userId) {
+        return res.sjson({
+            status: 403,
+            errors: ['Unauthorized access']
+        })
+    }
+
+    User.findOne({_id: mongoose.Types.ObjectId(userId)})
+    .then((user, err) => {
+        if (err) throw err
+
+        if (!user) {
+            return res.sjson({
+                status: 400,
+                errors: ['User not found']
+            })
+        }
+
+        Vote.find({user_id: user._id})
+        .then((votes, err) => {
+            return res.sjson({
+                status: 200,
+                data: {...user._doc, votes}
+            })
+        })
+
     })
 })
 
