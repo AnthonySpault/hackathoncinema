@@ -18,14 +18,17 @@ router.post('', forms.register, (req, res) => {
     User.findOne({username}, (err, user) => {
         if(err) throw err
         if (user) {
-            return res.sjson({status: 400, error: 'Username already in use'})
+            return res.sjson({
+                status: 400,
+                errors: ['Username already in use']
+            })
         }
 
         bcrypt.hash(password, 10, (err, hash) => {
             if(err) {
                 return res.sjson({
                     status: 500,
-                    err,
+                    errors: [err],
                 })
             }
             else {
@@ -38,7 +41,7 @@ router.post('', forms.register, (req, res) => {
                         data: result
                     })
                 }).catch(err => {
-                    res.sjson({ status: 500, err })
+                    res.sjson({ status: 500, errors: [err] })
                 })
             }
         })

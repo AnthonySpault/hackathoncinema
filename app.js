@@ -4,6 +4,7 @@ import express from 'express'
 import bodyParser from 'body-parser'
 import dotenv from 'dotenv'
 import jwt from 'jsonwebtoken'
+import cors from 'cors'
 
 import userRouter from './routes/user'
 import authRouter from './routes/auth'
@@ -20,11 +21,15 @@ app.use(bodyParser.urlencoded({
 
 app.use(bodyParser.json())
 
+app.use(cors())
+
 function authChecker(req, res, next) {
     const token = req.body.token || req.headers['x-access-token']
-    if (req.url === '/auth' || req.url === '/user') {
+
+    if (req.url === '/api/auth' || req.url === '/api/user') {
         return next()
     }
+
 
     if (token) {
         jwt.verify(token, process.env.SECRET, (err, decoded) => {
@@ -34,11 +39,8 @@ function authChecker(req, res, next) {
             req.decoded = decoded
             next()
         })
-    } else if (req.url === '/survey' && req.method == 'GET') {
-        return next()
-    }
-    else {
-        res.redirect('/auth')
+    } else {
+        res.redirect('/api/auth')
     }
 }
 
@@ -52,7 +54,7 @@ app.use((req, res, next) => {
     return next()
 })
 
-app.use('/user', userRouter)
-app.use('/auth', authRouter)
+app.use('/api/user', userRouter)
+app.use('/api/auth', authRouter)
 
 export default app
