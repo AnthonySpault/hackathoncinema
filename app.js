@@ -8,6 +8,8 @@ import cors from 'cors'
 
 import userRouter from './routes/user'
 import authRouter from './routes/auth'
+import movieRouter from './routes/movie'
+import voteRouter from './routes/vote'
 
 dotenv.config()
 
@@ -56,5 +58,7 @@ app.use((req, res, next) => {
 
 app.use('/api/user', userRouter)
 app.use('/api/auth', authRouter)
+app.use('/api/movie', movieRouter)
+app.use('/api/vote', voteRouter)
 
 export default app
