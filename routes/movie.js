@@ -1,6 +1,7 @@
 import express from 'express'
 
 import Movie from '../models/Movie'
+import Vote from '../models/Vote'
 
 const router = express.Router()
 
@@ -30,10 +31,29 @@ router.get('', (req, res) => {
             }
         }
     ]).then((movies, errors) => {
-        return res.sjson({
-            status: 200,
-            data: movies
-        })
+        if (req.decoded && req.decoded._id) {
+            Vote.find({user_id: req.decoded._id, movie_id: { $in: movies.map((movie) => movie._id) } })
+            .then((votes) => {
+                const formattedMovies = movies.map((movie) => {
+                    const index = votes.findIndex((vote) => JSON.stringify(vote.movie_id) === JSON.stringify(movie._id))
+
+                    return {
+                        ...movie,
+                        hasVoted: index !== -1
+                    }
+                })
+
+                return res.sjson({
+                    status: 200,
+                    data: formattedMovies
+                })
+            })
+        } else {
+            return res.sjson({
+                status: 200,
+                data: movies
+            })
+        }
     })
 })
 

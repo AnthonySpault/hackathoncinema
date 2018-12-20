@@ -30,7 +30,7 @@ function authChecker(req, res, next) {
 
     const allowed = ['/api/auth', '/api/user']
 
-    if (allowed.includes(req.url) || req.url.startsWith('/api/movie')) {
+    if (allowed.includes(req.url)) {
         return next()
     }
 
@@ -43,7 +43,10 @@ function authChecker(req, res, next) {
             req.decoded = decoded
             next()
         })
-    } else {
+    } else if (req.url.startsWith('/api/movie')) {
+        next()
+    }
+    else {
         res.redirect('/api/auth')
     }
 }
