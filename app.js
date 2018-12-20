@@ -28,7 +28,9 @@ app.use(cors())
 function authChecker(req, res, next) {
     const token = req.body.token || req.headers['x-access-token']
 
-    if (req.url === '/api/auth' || req.url === '/api/user') {
+    const allowed = ['/api/auth', '/api/user']
+
+    if (allowed.includes(req.url) || req.url.startsWith('/api/movie')) {
         return next()
     }
 
