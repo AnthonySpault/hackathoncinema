@@ -37,7 +37,7 @@ function authChecker(req, res, next) {
     if (token) {
         jwt.verify(token, process.env.SECRET, (err, decoded) => {
             if (err) {
-                return res.json({ success: false, message: 'Failed to authenticate token.' })
+                return res.status(403).json({ success: false, message: 'Failed to authenticate token.' })
             }
 
             req.decoded = decoded
