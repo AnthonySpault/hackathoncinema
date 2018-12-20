@@ -57,13 +57,19 @@ router.get('', (req, res) => {
     })
 })
 
+Date.prototype.addDays = function(days) {
+    var date = new Date(this.valueOf())
+    date.setDate(date.getDate() + days)
+    return date
+}
+
 router.get('/qualifiedMovie', (req, res) => {
     const date = new Date()
 
     const month = req.query.month || date.getMonth()
 
     const firstDay = new Date(date.getFullYear(), month, 1)
-    const lastDay = new Date(date.getFullYear(), month + 1, 0)
+    const lastDay = firstDay.addDays(28)
 
     Movie.aggregate([
         {

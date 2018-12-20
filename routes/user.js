@@ -53,8 +53,6 @@ router.post('', forms.register, (req, res) => {
 router.get('/:userId', (req, res) => {
     const userId = req.params.userId
 
-    console.log(req.decoded)
-
     if (req.decoded._id !== userId) {
         return res.sjson({
             status: 403,
