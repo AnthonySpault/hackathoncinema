@@ -8,6 +8,7 @@ const router = express.Router()
 
 router.post('/:movieId', (req, res) => {
     const movieId = req.params.movieId
+    
     Movie.findOne({_id: mongoose.Types.ObjectId(movieId)})
     .then((movie, err) => {
         if (!movie) {
@@ -27,7 +28,7 @@ router.post('/:movieId', (req, res) => {
             }
 
             const categories = req.body.categories || []
-            const grade = req.body.grade || categories.reduce((a, b) => a.grade + b.grade) / categories.length
+            const grade = req.body.grade || categories.reduce((a, b) => a + b.grade, 0) / categories.length
 
             new Vote({
                 user_id: mongoose.Types.ObjectId(req.decoded._id),
