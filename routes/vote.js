@@ -8,7 +8,6 @@ const router = express.Router()
 
 router.post('/multiples', (req, res) => {
     const potVotes = req.body.potVotes
-
     const errors = []
 
     Movie.find({_id: { $in: potVotes.map((vote) => vote.id)}})
@@ -22,10 +21,10 @@ router.post('/multiples', (req, res) => {
         }
 
         potVotes.forEach((vote) => {
-            const index = movies.findIndex((movie) => JSON.stringify(movie._id) === vote.id)
+            const index = movies.findIndex((movie) => JSON.stringify(movie._id) === JSON.stringify(vote.id))
 
-            if(index === -1) {
-                errors.push({id: movie._id, msg: 'Movie not found'})
+            if (index === -1) {
+                errors.push({id: vote.id, msg: 'Movie not found'})
             }
         })
 
@@ -35,7 +34,7 @@ router.post('/multiples', (req, res) => {
             const newVotes = []
 
             movies.forEach((movie) => {
-                const index = (votes || []).findIndex((vote) => vote.movie_id === movie._id)
+                const index = (votes || []).findIndex((vote) => JSON.stringify(vote.movie_id) == JSON.stringify(movie._id))
 
                 if (index === -1) {
                     const newVote = potVotes.find((vote) => {
@@ -56,8 +55,7 @@ router.post('/multiples', (req, res) => {
                 }
             })
 
-            Vote.create(newVotes)
-            .then((votes) => {
+            Vote.create(newVotes).then((votes) => {
                 res.sjson({
                     status: 200,
                     data: votes,
