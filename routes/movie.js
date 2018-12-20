@@ -93,11 +93,34 @@ router.get('/qualifiedMovie', (req, res) => {
 
                     const filteredVotes = votes.filter((vote) => vote.movie_id.toString() === movie._id.toString())
 
-                    const grade = filteredVotes.reduce((a, b) => a + b.grade, 0) / filteredVotes.length
+                    const categories = {}
+
+                    const grade = filteredVotes.reduce((a, b) =>{
+                        b.categories.forEach((category) => {
+                            if (categories[category.criteria]) {
+                                categories[category.criteria].grade += category.grade
+                                categories[category.criteria].count += 1
+                            } else {
+                                categories[category.criteria] = { grade: category.grade, count: 1 }
+                            }
+                        })
+                        return a + b.grade
+                    }, 0) / filteredVotes.length
+
+
+                    const formattedCategories = []
+
+                    Object.keys(categories).forEach((key) => {
+                        formattedCategories.push({
+                            criteria: key,
+                            grade: categories[key].grade / categories[key].count
+                        })
+                    })
 
                     return {
                         ...movie,
                         grade,
+                        categories: formattedCategories,
                     }
                 }).sort((a, b) => a.grade < b.grade)[0]
             })
