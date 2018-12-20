@@ -9,8 +9,25 @@ const router = express.Router()
 router.post('/multiples', (req, res) => {
     const potVotes = req.body.potVotes
 
+    const errors = []
+
     Movie.find({_id: { $in: potVotes.map((vote) => vote.id)}})
     .then((movies, err) => {
+
+        if (!movies) {
+            return res.sjson({
+                status: 400,
+                errors: ['Movies not found']
+            })
+        }
+
+        potVotes.forEach((vote) => {
+            const index = movies.findIndex((movie) => JSON.stringify(movie._id) === vote.id)
+
+            if(index === -1) {
+                errors.push({id: movie._id, msg: 'Movie not found'})
+            }
+        })
 
         Vote.find({user_id: mongoose.Types.ObjectId(req.decoded._id), movie_id: { $in: movies.map((movie) => movie._id) }})
         .then((votes, err) => {
@@ -18,7 +35,7 @@ router.post('/multiples', (req, res) => {
             const newVotes = []
 
             movies.forEach((movie) => {
-                const index = votes.findIndex((vote) => vote.movie_id === movie._id)
+                const index = (votes || []).findIndex((vote) => vote.movie_id === movie._id)
 
                 if (index === -1) {
                     const newVote = potVotes.find((vote) => {
@@ -34,6 +51,8 @@ router.post('/multiples', (req, res) => {
                         grade,
                         categories,
                     }))
+                } else {
+                    errors.push({id: movie._id, msg: 'Already voted'})
                 }
             })
 
@@ -41,10 +60,10 @@ router.post('/multiples', (req, res) => {
             .then((votes) => {
                 res.sjson({
                     status: 200,
-                    data: votes
+                    data: votes,
+                    errors
                 })
             })
-
         })
     })
 })
